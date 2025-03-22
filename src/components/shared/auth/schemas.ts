@@ -1,10 +1,23 @@
 import { z } from "zod";
 
-export const authFormSchema = (type: string) =>
-  z.object({
-    //sign up
-    firstName: type === "sign-up" ? z.string().min(3) : z.string().optional(),
-    phoneNumber: z.string().min(8),
-    //both
-    
+export const loginFormSchema = z.object({
+  email: z.string().email().max(50),
+  password: z.string().min(8).max(50),
+});
+
+export const registerFormSchema = loginFormSchema
+  .merge(z.object({ name: z.string().min(2, { message: "Enter your name" }).max(50), confirmPassword: z.string().min(8).max(50) }))
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "passwords doesn't match",
+    path: ["confirmPassword"],
   });
+
+export type TRegisterFormValues = z.infer<typeof registerFormSchema>;
+export type TLoginFormValues = z.infer<typeof loginFormSchema>;
+
+export type AuthFormValues = {
+  email: string;
+  password: string;
+  name?: string;
+  confirmPassword?: string;
+};
